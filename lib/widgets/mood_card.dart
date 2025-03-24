@@ -9,6 +9,7 @@ class MoodCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Color(0xFFFFFFFF),
       margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

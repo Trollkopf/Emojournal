@@ -29,6 +29,7 @@ class _MoodListScreenState extends State<MoodListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFE6E6FF),
       appBar: AppBar(
         title: const Text('Historial de estados de ánimo'),
       ),
