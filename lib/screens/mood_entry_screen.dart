@@ -69,20 +69,26 @@ class _MoodEntryScreenState extends State<MoodEntryScreen> {
             SizedBox(height: 20),
 
             // Selector de estados de ánimo (íconos)
-            Wrap(
-              spacing: 10,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: List.generate(moodIcons.length, (index) {
-                return ChoiceChip(
-                  label: Icon(moodIcons[index], size: 30), // Icono visible
-                  selected: selectedMoodId == index, // Activo si coincide con el seleccionado
-                  onSelected: (_) {
-                    setState(() {
-                      selectedMoodId = index; // Guardamos selección
-                    });
-                  },
+                return Flexible(
+                  child: ChoiceChip(
+                    label: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Icon(moodIcons[index], size: 30),
+                    ),
+                    selected: selectedMoodId == index,
+                    onSelected: (_) {
+                      setState(() {
+                        selectedMoodId = index;
+                      });
+                    },
+                  ),
                 );
               }),
             ),
+
 
             SizedBox(height: 30),
 
@@ -104,9 +110,64 @@ class _MoodEntryScreenState extends State<MoodEntryScreen> {
               icon: Icon(Icons.save),
               label: Text('Guardar'),
             ),
+            // ZONA DE PRUEBAS
+            SizedBox(height: 40),
+            Divider(),
+            Text(
+              '⚠️ Zona de pruebas (solo para desarrollo)',
+              style: TextStyle(fontSize: 14, color: Colors.redAccent),
+            ),
+            SizedBox(height: 8),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red.shade100,
+                foregroundColor: Colors.red.shade800,
+              ),
+              icon: Icon(Icons.delete_forever),
+              label: Text('Borrar todos los registros'),
+              onPressed: () async {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('¿Seguro que quieres borrar todo?'),
+                    content: Text('Esta acción eliminará todos los registros guardados.'),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(context, false), child: Text('Cancelar')),
+                      TextButton(onPressed: () => Navigator.pop(context, true), child: Text('Sí, borrar')),
+                    ],
+                  ),
+                );
+
+                if (confirm == true) {
+                  await MoodStorage.clearAll();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Todos los datos han sido eliminados.')),
+                  );
+                }
+              },
+            ),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue.shade100,
+                foregroundColor: Colors.indigo,
+              ),
+              icon: Icon(Icons.data_usage),
+              label: Text('Generar datos de prueba (30 días)'),
+              onPressed: () async {
+                await MoodStorage.generateDummyData();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Se han generado datos de prueba para los últimos 30 días.')),
+                );
+              },
+            ),
+
+
           ],
+
         ),
+
       ),
+
     );
   }
 }

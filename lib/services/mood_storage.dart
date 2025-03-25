@@ -1,4 +1,5 @@
 import 'dart:convert';                           // Para convertir datos a JSON y desde JSON
+import 'dart:math';
 import 'package:flutter/foundation.dart';        // Para debug/logs en modo desarrollo
 import 'package:shared_preferences/shared_preferences.dart';  // Almacenamiento local simple
 import '../models/mood_entry.dart';              // Modelo de entrada de estado de ánimo
@@ -47,9 +48,36 @@ class MoodStorage {
     }
   }
 
+  // ZONA DE TESTEO
   // Borra todos los registros guardados (útil para reiniciar la app o depurar)
   static Future<void> clearAll() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(key);
   }
+
+  // Añadimos datos aleatorios para el último mes
+  static Future<void> generateDummyData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final now = DateTime.now();
+
+    List<MoodEntry> dummyEntries = List.generate(30, (i) {
+      final date = now.subtract(Duration(days: i));
+      final randomMoodId = Random().nextInt(5);
+      final note = switch(randomMoodId){
+          0 => 'Todo bien',
+          1 => 'Muy Feliz',
+          2 => 'Ni fu ni fa',
+          3 => 'Sin comentarios',
+          4 => 'Bastante mejorable...',
+        int() => throw UnimplementedError(),
+      };
+           return MoodEntry(moodId: randomMoodId, note: note, date: date);
+    });
+
+    dummyEntries = dummyEntries.reversed.toList(); // ordenamos del más antiguo al más reciente
+
+    final encoded = dummyEntries.map((e) => jsonEncode(e.toJson())).toList();
+    await prefs.setStringList(MoodStorage.key, encoded);
+  }
+
 }

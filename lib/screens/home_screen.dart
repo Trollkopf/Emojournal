@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // Analiza cómo ha sido el periodo actual (media, mejor y peor día)
-  String interpretWeek() {
+  Widget interpretWeek() {
     // Convertimos los moodId en valores numéricos
     final values = recentEntries.map((e) => moodScores[e.moodId]).toList();
     final avg = values.reduce((a, b) => a + b) / values.length;
@@ -89,9 +89,9 @@ class _HomeScreenState extends State<HomeScreen> {
     if (avg >= 4.5) {
       moodText = "$periodLabel muy positiv$genere 😄";
     } else if (avg >= 3.5) {
-      moodText = "$periodLabel alegre 🙂";
+      moodText = "$periodLabel alegre 😀";
     } else if (avg >= 2.5) {
-      moodText = "$periodLabel estable 😐";
+      moodText = "$periodLabel estable 🙂";
     } else if (avg >= 1.5) {
       moodText = "$periodLabel bajit$genere 😕";
     } else {
@@ -111,22 +111,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
     String format(DateTime d) => '${d.day}/${d.month}';
 
-    return '''
-$moodText
-📈 Mejor día: ${format(best)}
-📉 Peor día: ${format(worst)}
-''';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          moodText,
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        Divider(thickness: 1.2),
+        Text("📈 Mejor día: ${format(best)}"),
+        Text("📉 Peor día: ${format(worst)}"),
+      ],
+    );
   }
 
   // Compara el periodo actual con el anterior
   Future<String> compareWithPreviousPeriod() async {
     final allEntries = await MoodStorage.loadMoodEntries();
-
     final now = DateTime.now();
     final currentPeriod = List.generate(selectedDays, (i) => now.subtract(Duration(days: i)));
     final previousPeriod = List.generate(selectedDays, (i) => now.subtract(Duration(days: i + selectedDays)));
 
-    // Calcula la media para una lista de fechas
     double avgScore(List<DateTime> days) {
       final entries = days.map((day) {
         return allEntries.lastWhere(
@@ -146,13 +151,20 @@ $moodText
     final previousAvg = avgScore(previousPeriod);
 
     if ((currentAvg - previousAvg).abs() < 0.3) {
-      return "Has mantenido tu estado emocional estable 🔄";
+      if (currentAvg >= 4.0) {
+        return "Tu estado de ánimo se ha mantenido alto 😃";
+      } else if (currentAvg <= 2.0) {
+        return "Tu estado de ánimo sigue siendo bajo, cuídate 💙";
+      } else {
+        return "No hubo muchos cambios respecto al periodo anterior 🙃";
+      }
     } else if (currentAvg > previousAvg) {
       return "Has mejorado respecto al periodo anterior 💪";
     } else {
-      return "Tus emociones bajaron un poco respecto al periodo anterior 😕";
+      return "Tu estado de ánimo ha bajado respecto al periodo anterior 😕";
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -208,31 +220,44 @@ $moodText
               SizedBox(height: 8),
 
               // Interpretación del periodo actual
-              Text(
-                interpretWeek(),
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                padding: EdgeInsets.all(16),
+                margin: EdgeInsets.only(bottom: 50),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    interpretWeek(),
+                    SizedBox(height: 8),
+                    // Comparativa con el periodo anterior
+                    FutureBuilder(
+                      future: compareWithPreviousPeriod(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return SizedBox.shrink();
+                        } else if (snapshot.hasData) {
+                          return Text(
+                            snapshot.data!,
+                            style: TextStyle(fontSize: 14, color: Colors.black54),
+                          );
+                        } else {
+                          return SizedBox.shrink();
+                        }
+                      },
+                    ),
+                  ],
+                ),
               ),
-
-              // Comparación con el periodo anterior
-              FutureBuilder(
-                future: compareWithPreviousPeriod(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return SizedBox.shrink();
-                  } else if (snapshot.hasData) {
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                        snapshot.data!,
-                        style: TextStyle(fontSize: 14, color: Colors.black54),
-                      ),
-                    );
-                  } else {
-                    return SizedBox.shrink();
-                  }
-                },
-              ),
-              SizedBox(height: 16),
 
               // Gráfico de línea con estados de ánimo
               SizedBox(
