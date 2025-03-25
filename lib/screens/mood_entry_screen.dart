@@ -3,18 +3,26 @@ import '../models/mood_entry.dart';
 import '../services/mood_storage.dart';
 
 class MoodEntryScreen extends StatefulWidget {
+  const MoodEntryScreen({super.key});
+
   @override
   _MoodEntryScreenState createState() => _MoodEntryScreenState();
 }
 
 class _MoodEntryScreenState extends State<MoodEntryScreen> {
-  String? selectedMood;
+  int? selectedMoodId;
   final TextEditingController noteController = TextEditingController();
 
-  final List<String> moods = ['😄', '😐', '😢', '😠', '😴'];
+  final List<IconData> moodIcons = [
+    Icons.sentiment_very_satisfied,    // 0
+    Icons.sentiment_satisfied,         // 1
+    Icons.sentiment_neutral,           // 2
+    Icons.sentiment_dissatisfied,      // 3
+    Icons.sentiment_very_dissatisfied, // 4
+  ];
 
   void saveMood() async {
-    if (selectedMood == null) {
+    if (selectedMoodId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Por favor selecciona un estado de ánimo')),
       );
@@ -22,7 +30,7 @@ class _MoodEntryScreenState extends State<MoodEntryScreen> {
     }
 
     final newEntry = MoodEntry(
-      emoji: selectedMood!,
+      moodId: selectedMoodId!,
       note: noteController.text,
       date: DateTime.now(),
     );
@@ -30,7 +38,7 @@ class _MoodEntryScreenState extends State<MoodEntryScreen> {
     await MoodStorage.saveMoodEntry(newEntry);
 
     setState(() {
-      selectedMood = null;
+      selectedMoodId = null;
       noteController.clear();
     });
 
@@ -51,17 +59,17 @@ class _MoodEntryScreenState extends State<MoodEntryScreen> {
             SizedBox(height: 20),
             Wrap(
               spacing: 10,
-              children: moods.map((mood) {
+              children: List.generate(moodIcons.length, (index) {
                 return ChoiceChip(
-                  label: Text(mood, style: TextStyle(fontSize: 24)),
-                  selected: selectedMood == mood,
-                  onSelected: (bool selected) {
+                  label: Icon(moodIcons[index], size: 30),
+                  selected: selectedMoodId == index,
+                  onSelected: (_) {
                     setState(() {
-                      selectedMood = selected ? mood : null;
+                      selectedMoodId = index;
                     });
                   },
                 );
-              }).toList(),
+              }),
             ),
             SizedBox(height: 30),
             TextField(

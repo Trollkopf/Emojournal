@@ -22,27 +22,22 @@ class _MoodListScreenState extends State<MoodListScreen> {
   Future<void> loadEntries() async {
     final entries = await MoodStorage.loadMoodEntries();
     setState(() {
-      moodEntries = entries.reversed.toList(); // últimos primero
+      moodEntries = entries.reversed.toList();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFE6E6FF),
-      appBar: AppBar(
-        title: const Text('Historial de estados de ánimo'),
-      ),
+      appBar: AppBar(title: Text('Historial completo')),
       body: moodEntries.isEmpty
-          ? const Center(child: Text('Aún no hay registros 😌'))
+          ? Center(child: Text('Aún no hay registros 😌'))
           : ListView.builder(
         itemCount: moodEntries.length,
         itemBuilder: (context, index) {
-          final entry = moodEntries[index];
-          return MoodCard(entry: entry);
+          return MoodCard(entry: moodEntries[index]);
         },
       ),
     );
   }
 }
-

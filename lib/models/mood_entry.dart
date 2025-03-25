@@ -1,27 +1,25 @@
 class MoodEntry {
-  final String emoji;
+  final int moodId;
   final String note;
   final DateTime date;
 
   MoodEntry({
-    required this.emoji,
+    required this.moodId,
     required this.note,
     required this.date,
   });
 
-  // Para guardar como JSON
   Map<String, dynamic> toJson() {
     return {
-      'emoji': emoji,
+      'moodId': moodId,
       'note': note,
       'date': date.toIso8601String(),
     };
   }
 
-  // Para leer desde JSON
   factory MoodEntry.fromJson(Map<String, dynamic> json) {
     return MoodEntry(
-      emoji: json['emoji'],
+      moodId: json['moodId'],
       note: json['note'],
       date: DateTime.parse(json['date']),
     );
