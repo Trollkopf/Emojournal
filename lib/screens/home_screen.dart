@@ -11,48 +11,61 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  // Lista con los estados de ánimo del periodo seleccionado
   List<MoodEntry> recentEntries = [];
+
+  // Días seleccionados (7, 15 o 30)
   int selectedDays = 7;
 
+  // Valores numéricos asociados a cada icono de estado de ánimo
   final List<int> moodScores = [5, 4, 3, 2, 1];
+
+  // Lista de iconos de estado de ánimo (índice = moodId)
   final List<IconData> moodIcons = [
-    Icons.sentiment_very_satisfied,    // 0
-    Icons.sentiment_satisfied,         // 1
-    Icons.sentiment_neutral,           // 2
-    Icons.sentiment_dissatisfied,      // 3
-    Icons.sentiment_very_dissatisfied, // 4
+    Icons.sentiment_very_satisfied,
+    Icons.sentiment_satisfied,
+    Icons.sentiment_neutral,
+    Icons.sentiment_dissatisfied,
+    Icons.sentiment_very_dissatisfied,
   ];
 
   @override
   void initState() {
     super.initState();
-    loadRecentEntries();
+    loadRecentEntries(); // cargamos los últimos estados de ánimo al iniciar
   }
 
+  // Cargar los últimos estados de ánimo según los días seleccionados
   Future<void> loadRecentEntries() async {
     final allEntries = await MoodStorage.loadMoodEntries();
     final now = DateTime.now();
+
+    // Genera una lista de fechas (hoy, ayer, etc.)
     final lastDays = List.generate(selectedDays, (i) => now.subtract(Duration(days: i)));
 
+    // Para cada día, busca si hay un registro guardado. Si no, asigna estado neutral (moodId 2)
     final filtered = lastDays.map((day) {
       return allEntries.lastWhere(
             (entry) =>
         entry.date.day == day.day &&
             entry.date.month == day.month &&
             entry.date.year == day.year,
-        orElse: () => MoodEntry(moodId: 2, note: '', date: day), // moodId 2 = neutral
+        orElse: () => MoodEntry(moodId: 2, note: '', date: day), // neutral por defecto
       );
-    }).toList().reversed.toList();
+    }).toList().reversed.toList(); // reversa para ordenarlo del más antiguo al más reciente
 
     setState(() {
       recentEntries = filtered;
     });
   }
 
+  // Analiza cómo ha sido el periodo actual (media, mejor y peor día)
   String interpretWeek() {
+    // Convertimos los moodId en valores numéricos
     final values = recentEntries.map((e) => moodScores[e.moodId]).toList();
     final avg = values.reduce((a, b) => a + b) / values.length;
 
+    // Etiqueta del periodo (semana, quincena o mes)
     String periodLabel;
     switch (selectedDays) {
       case 7:
@@ -68,13 +81,10 @@ class _HomeScreenState extends State<HomeScreen> {
         periodLabel = "$selectedDays días";
     }
 
-    String genere;
-    if (selectedDays == 30){
-      genere = "o";
-    } else {
-      genere = "a";
-    }
+    // Ajusta la letra final (positivA o positivO)
+    String genere = (selectedDays == 30) ? "o" : "a";
 
+    // Texto interpretado según la media
     String moodText;
     if (avg >= 4.5) {
       moodText = "$periodLabel muy positiv$genere 😄";
@@ -85,9 +95,10 @@ class _HomeScreenState extends State<HomeScreen> {
     } else if (avg >= 1.5) {
       moodText = "$periodLabel bajit$genere 😕";
     } else {
-      moodText = "Semana difícil 😢";
+      moodText = "$periodLabel difícil 😢";
     }
 
+    // Buscar mejor y peor día
     int maxIndex = 0;
     int minIndex = 0;
     for (int i = 1; i < values.length; i++) {
@@ -107,6 +118,7 @@ $moodText
 ''';
   }
 
+  // Compara el periodo actual con el anterior
   Future<String> compareWithPreviousPeriod() async {
     final allEntries = await MoodStorage.loadMoodEntries();
 
@@ -114,6 +126,7 @@ $moodText
     final currentPeriod = List.generate(selectedDays, (i) => now.subtract(Duration(days: i)));
     final previousPeriod = List.generate(selectedDays, (i) => now.subtract(Duration(days: i + selectedDays)));
 
+    // Calcula la media para una lista de fechas
     double avgScore(List<DateTime> days) {
       final entries = days.map((day) {
         return allEntries.lastWhere(
@@ -141,13 +154,12 @@ $moodText
     }
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
+    // Convertimos cada moodId a su puntuación numérica
     final moodValues = recentEntries.map((e) => moodScores[e.moodId]).toList();
 
+    // Si no hay datos, mostramos mensaje vacío
     if (recentEntries.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: Text('Resumen')),
@@ -155,6 +167,7 @@ $moodText
       );
     }
 
+    // Identificamos el índice del mejor y peor día
     final maxIndex = moodValues.indexOf(moodValues.reduce((a, b) => a > b ? a : b));
     final minIndex = moodValues.indexOf(moodValues.reduce((a, b) => a < b ? a : b));
 
@@ -168,6 +181,7 @@ $moodText
             key: ValueKey(selectedDays),
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Selector de rango (7, 15 o 30 días)
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -192,10 +206,14 @@ $moodText
                 ],
               ),
               SizedBox(height: 8),
+
+              // Interpretación del periodo actual
               Text(
                 interpretWeek(),
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
+
+              // Comparación con el periodo anterior
               FutureBuilder(
                 future: compareWithPreviousPeriod(),
                 builder: (context, snapshot) {
@@ -215,6 +233,8 @@ $moodText
                 },
               ),
               SizedBox(height: 16),
+
+              // Gráfico de línea con estados de ánimo
               SizedBox(
                 height: 220,
                 child: LineChart(
@@ -257,6 +277,7 @@ $moodText
                         dotData: FlDotData(
                           show: true,
                           getDotPainter: (spot, percent, barData, index) {
+                            // Colores diferentes para el mejor y peor día
                             if (index == maxIndex) {
                               return FlDotCirclePainter(
                                 radius: 6,

@@ -1,16 +1,69 @@
-# emojournal
+# 📱 Emojournal
 
-A new Flutter project.
+**Emojournal** es una app móvil sencilla pero poderosa para registrar tu estado de ánimo diario. Utiliza iconos de Material Design para representar tus emociones y te ofrece un resumen visual de cómo te has sentido en los últimos días, semanas o meses.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 🌟 Funcionalidades
 
-A few resources to get you started if this is your first Flutter project:
+- Selección de estado de ánimo mediante iconos intuitivos
+- Opción de añadir una nota personal por cada entrada
+- Gráfico de línea con tu evolución emocional
+- Comparación con el periodo anterior
+- Historial completo de todos tus registros
+- Interfaz clara, moderna y amigable
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🧠 Tecnologías usadas
+
+- [Flutter](https://flutter.dev/) (SDK 3.x)
+- [fl_chart](https://pub.dev/packages/fl_chart) para visualización de datos
+- [shared_preferences](https://pub.dev/packages/shared_preferences) para almacenamiento local
+- Icons de [Material Design](https://fonts.google.com/icons)
+
+---
+
+## 📦 Estructura del proyecto
+
+```
+lib/
+├── models/             # Modelo de datos (MoodEntry)
+├── screens/            # Pantallas: home, historial, entrada
+├── services/           # Almacenamiento local (MoodStorage)
+├── widgets/            # Componentes reutilizables (MoodCard)
+└── main.dart           # Punto de entrada
+```
+
+---
+
+## 🚀 Cómo ejecutar
+
+```bash
+flutter pub get
+flutter run
+```
+
+---
+
+## 💾 Notas de desarrollo
+
+- Los datos se guardan localmente con `shared_preferences`.
+- Cada entrada se compone de un `moodId`, nota opcional y fecha.
+- El resumen gráfico se actualiza según el rango de días elegido (semana, quincena o mes).
+- La comparación con el periodo anterior se calcula automáticamente.
+
+---
+
+## 🧩 Próximas mejoras (ideas)
+
+- Exportar como imagen el resumen emocional
+- Recordatorios diarios para registrar tu ánimo
+- Filtros y etiquetas personalizadas
+- Estadísticas mensuales o anuales
+
+---
+
+## 📄 Licencia
+
+Este proyecto es de uso personal/educativo. ¡Si te sirve de base para algo más grande, me alegra mucho! 😊
