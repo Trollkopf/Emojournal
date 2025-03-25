@@ -2,6 +2,8 @@
 
 **Emojournal** es una app móvil sencilla pero poderosa para registrar tu estado de ánimo diario. Utiliza iconos de Material Design para representar tus emociones y te ofrece un resumen visual de cómo te has sentido en los últimos días, semanas o meses.
 
+Repositorio del proyecto 👉 [github.com/Trollkopf/Emojournal](https://github.com/Trollkopf/Emojournal)
+
 ---
 
 ## 🌟 Funcionalidades
@@ -61,6 +63,13 @@ flutter run
 - Recordatorios diarios para registrar tu ánimo
 - Filtros y etiquetas personalizadas
 - Estadísticas mensuales o anuales
+
+---
+
+## 👤 Autor
+
+Desarrollado por [Maximiliano Serratosa Obladen](https://www.linkedin.com/in/maximiliano-serratosa-obladen-full-stack-developer/)  
+GitHub: [@Trollkopf](https://github.com/Trollkopf)
 
 ---
 
